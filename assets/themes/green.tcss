@@ -1,0 +1,60 @@
+#boot { 
+    text-align: center;
+}
+
+MainMenu Static { 
+    /* padding: 1;  */
+    text-align: center;
+    text-style: bold;
+    width: 100%;
+    content-align: center middle;
+    padding: 2 0;
+}
+
+#scanlines {
+    layer: overlay;
+    opacity: 0.05;
+    color: black ;
+}
+
+#options {
+    height: 100%;
+    /* margin: 2 4; */
+    background: black;
+    color: green;
+    border: black;
+    /* padding: 1 2; */
+}
+
+Screen {
+    background: black;
+    color: green;
+}
+
+ListView {
+    background: black;
+}
+
+ListItem {
+    background: black;
+    color: green;
+    text-style: bold;
+    /* padding: 1; */
+}
+
+ListItem:focus {
+    background: green;
+    color: black;
+}
+
+Label {
+    color: green;
+}
+
+Header {
+    background: black;
+}
+
+Header * {
+    color: green;
+}
