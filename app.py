@@ -36,6 +36,16 @@ class FalloutListItem(ListItem):
             return Text(padded, style="green on black")
 
 
+class ShutdownScreen(Screen):
+
+    MENU_TEXT = """
+ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM
+COPYRIGHT 2075-2077 ROBCO INDUSTRIES
+"""
+
+    def compose(self):
+        yield Static(self.MENU_TEXT, id="shutdownmenu")
+        yield Static("VAULT OS shutting down...", id="shutdown")
 
 class Status(Static):
     pass
@@ -96,8 +106,8 @@ class VaultOS(App):
         yield Header()
         # yield BootSeq(id="bootseq")
         yield MainMenu(id="mainmenu")
-        yield Container(VerticalScroll(Options()), id="options")
         yield Status(id="status")
+        yield Container(VerticalScroll(Options()), id="options")
         
     def action_games(self):
         self.push_screen(GamesScreen())
@@ -107,10 +117,10 @@ class VaultOS(App):
         launch_terminal()
 
     async def action_quit(self):
-        status = self.query_one("#status", Static)
-        status.update("VAULT OS shutting down...")
+        await self.push_screen(ShutdownScreen())
         await asyncio.sleep(2)
         self.exit()
+
 
     # async def run_boot_sequence(self):
     #     options = self.query_one(Options)

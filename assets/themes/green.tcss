@@ -74,7 +74,19 @@ ListItem:focus Label {
     color: black;
 }
 
+#shutdown {
+    content-align: center middle;
+    text-align: center;
+}
 
+#shutdownmenu {
+    content-align: center middle;
+    text-align: center;
+}
+
+#options {
+    max-height: 6;
+}
 
 Header {
     background: black;
