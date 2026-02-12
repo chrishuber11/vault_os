@@ -2,6 +2,23 @@
     text-align: center;
 }
 
+#bootseq {
+    display: none;
+    text-align: center;
+    padding: 2 0;
+}
+
+#mainmenu {
+    display: none;
+}
+
+MainMenu {
+    text-align: center;
+    text-style: bold;
+    content-align: center middle;
+}
+
+
 MainMenu Static { 
     /* padding: 1;  */
     text-align: center;
@@ -33,23 +50,31 @@ Screen {
 
 ListView {
     background: black;
+    width: 100%;
 }
 
 ListItem {
     background: black;
     color: green;
-    text-style: bold;
-    /* padding: 1; */
+    width: 100%;
 }
 
-ListItem:focus {
+ListItem > * {
+    background: black;
+    color: green;
+}
+
+ListItem:focus > * {
     background: green;
     color: black;
 }
 
-Label {
-    color: green;
+ListItem:focus Label {
+    background: green;
+    color: black;
 }
+
+
 
 Header {
     background: black;
@@ -58,3 +83,4 @@ Header {
 Header * {
     color: green;
 }
+

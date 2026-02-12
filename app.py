@@ -4,15 +4,48 @@ from textual.widget import Widget
 from textual.containers import VerticalScroll, Vertical, Container
 from textual import events
 from textual.screen import Screen
+from rich.text import Text
+from textual.message import Message
 
 from modules.games import launch_rogue
 from modules.terminal import launch_terminal
 import time
 import asyncio
 
+class FalloutListItem(ListItem):
+    def render(self):
+        # Width of THIS item, not the ListView
+        width = self.region.width
+
+        label = self.query_one(Label)
+        renderable = label.render()
+
+        if isinstance(renderable, Text):
+            text = renderable.plain
+        else:
+            text = str(renderable)
+
+        # Pad text to full width
+        padded = text.ljust(width)
+
+        is_highlighted = self.parent.highlighted_child is self
+
+        if is_highlighted:
+            return Text(padded, style="black on green")
+        else:
+            return Text(padded, style="green on black")
+
+
+
+class Status(Static):
+    pass
+
+# class BootFinished(Message):
+#     pass
+
 class MainMenu(Static):
     #Main Menu Widget
-    CSS_PATH = "assets/themes/green.tcss"
+    # CSS_PATH = "assets/themes/green.tcss"
 
     MENU_TEXT = """
 ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM
@@ -22,28 +55,31 @@ COPYRIGHT 2075-2077 ROBCO INDUSTRIES
     def compose(self) -> ComposeResult:
         yield Static(self.MENU_TEXT)
 
-class ScanlineOverlay(Widget):
-    def render(self):
-        width = self.size.width
-        height = self.size.height
-        lines = []
-        for i in range(height):
-            if i % 2 == 0:
-                lines.append(" " * width)
-            else:
-                lines.append(" " * width)
-        return "\n".join(lines)
-
+#     LINES = [
+#         "INITIALIZING VAULT-TEC SYSTEMS...",
+#         "LOADING KERNEL MODULES...",
+#         "CHECKING MEMORY...",
+#         "SYSTEM READY."
+#     ]
 
 class Options(ListView):
     #Main Menu Widget
-    CSS_PATH = "assets/themes/green.tcss"
+    # CSS_PATH = "assets/themes/green.tcss"
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        item_id = event.item.id
+
+        if item_id == "games":
+            self.app.action_games()
+        elif item_id == "terminal":
+            self.app.action_terminal()
 
     def compose(self):
-        yield ListItem(Label("Chatbot"))
-        yield ListItem(Label("Notes"))
-        yield ListItem(Label("Games"))
-        yield ListItem(Label("Terminal"))
+        yield FalloutListItem(Label("Chatbot"), id="chatbot")
+        yield FalloutListItem(Label("Notes"), id="notes")
+        yield FalloutListItem(Label("Games"), id="games")
+        yield FalloutListItem(Label("Terminal"), id="terminal")
+
 
 class GamesScreen(Screen): 
     def compose(self): 
@@ -58,10 +94,10 @@ class VaultOS(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield MainMenu()
+        # yield BootSeq(id="bootseq")
+        yield MainMenu(id="mainmenu")
         yield Container(VerticalScroll(Options()), id="options")
-        # yield ScanlineOverlay(id="scanlines")
-        # yield Footer()
+        yield Status(id="status")
         
     def action_games(self):
         self.push_screen(GamesScreen())
@@ -71,24 +107,19 @@ class VaultOS(App):
         launch_terminal()
 
     async def action_quit(self):
-        self.screen.update("VAULT OS shutting down...")
+        status = self.query_one("#status", Static)
+        status.update("VAULT OS shutting down...")
         await asyncio.sleep(2)
-        await self.shutdown()
+        self.exit()
 
-    async def on_mount(self):
-        self.query_one(MainMenu).display = False
-        await self.run_boot_sequence()
-        self.query_one(MainMenu).display = True
+    # async def run_boot_sequence(self):
+    #     options = self.query_one(Options)
+    #     options.focus()
 
-    async def run_boot_sequence(self):
-        boot = Static("INITIALIZING VAULT-TEC SYSTEMS...", id="boot")
-        await self.mount(boot)
-        # await asyncio.sleep(1.5)
-        boot.update("LOADING KERNEL MODULES...")
-        # await asyncio.sleep(1.5)
-        boot.update("SYSTEM READY.")
-        await asyncio.sleep(1.0)
-        await boot.remove()
+    def on_mount(self):
+        options = self.query_one(Options)
+        self.call_after_refresh(options.focus)
+
 
 
 
