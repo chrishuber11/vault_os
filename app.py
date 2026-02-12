@@ -35,7 +35,6 @@ class FalloutListItem(ListItem):
         else:
             return Text(padded, style="green on black")
 
-
 class ShutdownScreen(Screen):
 
     MENU_TEXT = """
@@ -44,18 +43,12 @@ COPYRIGHT 2075-2077 ROBCO INDUSTRIES
 """
 
     def compose(self):
+        yield Header()
         yield Static(self.MENU_TEXT, id="shutdownmenu")
         yield Static("VAULT OS shutting down...", id="shutdown")
 
-class Status(Static):
-    pass
-
-# class BootFinished(Message):
-#     pass
-
 class MainMenu(Static):
     #Main Menu Widget
-    # CSS_PATH = "assets/themes/green.tcss"
 
     MENU_TEXT = """
 ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM
@@ -73,27 +66,46 @@ COPYRIGHT 2075-2077 ROBCO INDUSTRIES
 #     ]
 
 class Options(ListView):
-    #Main Menu Widget
-    # CSS_PATH = "assets/themes/green.tcss"
+    #Main Options Menu
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         item_id = event.item.id
 
         if item_id == "games":
-            self.app.action_games()
-        elif item_id == "terminal":
-            self.app.action_terminal()
+            self.app.games_menu()
+        elif item_id == "quit":
+            self.app.call_later(self.app.action_quit)
 
     def compose(self):
         yield FalloutListItem(Label("Chatbot"), id="chatbot")
         yield FalloutListItem(Label("Notes"), id="notes")
         yield FalloutListItem(Label("Games"), id="games")
         yield FalloutListItem(Label("Terminal"), id="terminal")
+        yield FalloutListItem(Label("Settings"), id="settings")
+        yield FalloutListItem(Label("Shutdown"), id="quit")
 
+class GameOptions(ListView):
+    #Game Options Menu
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        item_id = event.item.id
+
+        if item_id == "home":
+            self.app.return_home()
+
+    def compose(self):
+        yield FalloutListItem(Label("Rogue"), id="rogue")
+        yield FalloutListItem(Label("Back to Home"), id="home")
 
 class GamesScreen(Screen): 
     def compose(self): 
-        yield Static("Games coming soon...")
+        yield Header()
+        yield MainMenu(id="mainmenu")
+        yield Container(VerticalScroll(GameOptions()), id="options")
+
+    def on_mount(self):
+        options = self.query_one(GameOptions)
+        self.call_after_refresh(options.focus)
 
 class VaultOS(App):
     CSS_PATH = "assets/themes/green.tcss"
@@ -104,13 +116,14 @@ class VaultOS(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        # yield BootSeq(id="bootseq")
         yield MainMenu(id="mainmenu")
-        yield Status(id="status")
         yield Container(VerticalScroll(Options()), id="options")
         
-    def action_games(self):
+    def games_menu(self):
         self.push_screen(GamesScreen())
+
+    def return_home(self):
+        self.pop_screen()
 
     def action_terminal(self):
         self.exit()
@@ -121,16 +134,9 @@ class VaultOS(App):
         await asyncio.sleep(2)
         self.exit()
 
-
-    # async def run_boot_sequence(self):
-    #     options = self.query_one(Options)
-    #     options.focus()
-
     def on_mount(self):
         options = self.query_one(Options)
         self.call_after_refresh(options.focus)
-
-
 
 
 if __name__ == "__main__":

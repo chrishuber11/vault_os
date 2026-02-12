@@ -85,7 +85,7 @@ ListItem:focus Label {
 }
 
 #options {
-    max-height: 6;
+    max-height: 8;
 }
 
 Header {
