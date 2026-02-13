@@ -20,18 +20,7 @@ Initializing venv:
 
 source venv/bin/activate
 
-
-
-
-
-PowerShell:
-    python -m venv venv
-    venv\Scripts\Activate
-    python.exe -m pip install --upgrade pip
-    pip install textual
-
-Git Bash / WSL / macOS / Linux:
-    py -3.14 -m venv venv
-    source venv/bin/activate
-    python.exe -m pip install --upgrade pip
-    pip install textual
+"INITIALIZING VAULT-TEC SYSTEMS...",
+#         "LOADING KERNEL MODULES...",
+#         "CHECKING MEMORY...",
+#         "SYSTEM READY."

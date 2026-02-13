@@ -12,20 +12,29 @@ from modules.terminal import launch_terminal
 import time
 import asyncio
 
+class Typewriter(Static):
+    async def type_out(self, text: str, delay: float = 0.02):
+        buffer = ""
+        for char in text:
+            buffer += char
+            self.update(buffer + "▌")
+            await asyncio.sleep(delay)
+        self.update(buffer)
+
 class FalloutListItem(ListItem):
     def render(self):
-        # Width of THIS item, not the ListView
         width = self.region.width
 
-        label = self.query_one(Label)
-        renderable = label.render()
+        # Get the first child (Label OR Typewriter)
+        child = self.children[0]
+
+        renderable = child.render()
 
         if isinstance(renderable, Text):
             text = renderable.plain
         else:
             text = str(renderable)
 
-        # Pad text to full width
         padded = text.ljust(width)
 
         is_highlighted = self.parent.highlighted_child is self
@@ -35,35 +44,78 @@ class FalloutListItem(ListItem):
         else:
             return Text(padded, style="green on black")
 
+
 class ShutdownScreen(Screen):
 
+    def compose(self):
+        yield Header()
+        yield MainMenu(id="mainmenu")
+        yield Typewriter(id="shutdownmenu")
+        yield Typewriter(id="shutdown")
+
+    def on_mount(self):
+        msg = self.query_one("#shutdown", Typewriter)
+
+        async def sequence():
+            await msg.type_out("VAULT OS shutting down...", delay=0.02)
+
+        self.run_worker(sequence())
+
+
+class MainMenu(Static):
     MENU_TEXT = """
 ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM
 COPYRIGHT 2075-2077 ROBCO INDUSTRIES
+
+Welcome to ROBCO Industries (TM) Termlink
+"""
+
+    def compose(self):
+        yield Typewriter(id="menu_text")
+
+    def on_mount(self):
+        tw = self.query_one("#menu_text", Typewriter)
+
+        async def start():
+            # Wait until boot screen is gone
+            while self.app.screen_stack and isinstance(self.app.screen_stack[-1], BootUp):
+                await asyncio.sleep(0.1)
+
+            if self.app.main_menu_animated:
+                tw.update(self.MENU_TEXT)
+                return
+
+            await tw.type_out(self.MENU_TEXT, delay=0.025)
+            self.app.main_menu_animated = True
+
+        self.run_worker(start())
+
+
+class BootUp(Screen):
+    BOOT_TEXT = """
+ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM
+COPYRIGHT 2075-2077 ROBCO INDUSTRIES
+
+Welcome to ROBCO Industries (TM) Termlink
+INITIALIZING VAULT-TEC SYSTEMS...
+LOADING KERNEL MODULES...
+CHECKING MEMORY...
+SYSTEM READY.
 """
 
     def compose(self):
         yield Header()
-        yield Static(self.MENU_TEXT, id="shutdownmenu")
-        yield Static("VAULT OS shutting down...", id="shutdown")
+        yield Typewriter(id="bootuptext")
 
-class MainMenu(Static):
-    #Main Menu Widget
+    def on_mount(self):
+        tw = self.query_one("#bootuptext", Typewriter)
 
-    MENU_TEXT = """
-ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM
-COPYRIGHT 2075-2077 ROBCO INDUSTRIES
-"""
+        async def start():
+            await tw.type_out(self.BOOT_TEXT, delay=0.02)
+            await asyncio.sleep(1)
+            self.app.pop_screen()
 
-    def compose(self) -> ComposeResult:
-        yield Static(self.MENU_TEXT)
-
-#     LINES = [
-#         "INITIALIZING VAULT-TEC SYSTEMS...",
-#         "LOADING KERNEL MODULES...",
-#         "CHECKING MEMORY...",
-#         "SYSTEM READY."
-#     ]
+        self.run_worker(start())
 
 class Options(ListView):
     #Main Options Menu
@@ -77,12 +129,31 @@ class Options(ListView):
             self.app.call_later(self.app.action_quit)
 
     def compose(self):
-        yield FalloutListItem(Label("Chatbot"), id="chatbot")
-        yield FalloutListItem(Label("Notes"), id="notes")
-        yield FalloutListItem(Label("Games"), id="games")
-        yield FalloutListItem(Label("Terminal"), id="terminal")
-        yield FalloutListItem(Label("Settings"), id="settings")
-        yield FalloutListItem(Label("Shutdown"), id="quit")
+        yield FalloutListItem(Typewriter("", id="chatbot_tw"), id="chatbot")
+        yield FalloutListItem(Typewriter("", id="notes_tw"), id="notes")
+        yield FalloutListItem(Typewriter("", id="games_tw"), id="games")
+        yield FalloutListItem(Typewriter("", id="terminal_tw"), id="terminal")
+        yield FalloutListItem(Typewriter("", id="settings_tw"), id="settings")
+        yield FalloutListItem(Typewriter("", id="quit_tw"), id="quit")
+    
+    async def on_mount(self):
+        menu_items = [
+            ("chatbot_tw", "Chatbot"),
+            ("notes_tw", "Notes"),
+            ("games_tw", "Games"),
+            ("terminal_tw", "Terminal"),
+            ("settings_tw", "Settings"),
+            ("quit_tw", "Shutdown"),
+        ]
+
+        for tw_id, text in menu_items:
+            tw = self.query_one(f"#{tw_id}", Typewriter)
+            await tw.type_out(text, delay=0.01)
+            await asyncio.sleep(0.05)
+
+        self.focus()
+
+
 
 class GameOptions(ListView):
     #Game Options Menu
@@ -108,6 +179,12 @@ class GamesScreen(Screen):
         self.call_after_refresh(options.focus)
 
 class VaultOS(App):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.main_menu_animated = False
+
+
     CSS_PATH = "assets/themes/green.tcss"
 
     BINDINGS = [
@@ -135,6 +212,7 @@ class VaultOS(App):
         self.exit()
 
     def on_mount(self):
+        self.push_screen(BootUp())
         options = self.query_one(Options)
         self.call_after_refresh(options.focus)
 

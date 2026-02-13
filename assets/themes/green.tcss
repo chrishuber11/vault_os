@@ -9,7 +9,7 @@
 }
 
 #mainmenu {
-    display: none;
+    display: block;
 }
 
 MainMenu {
@@ -17,7 +17,6 @@ MainMenu {
     text-style: bold;
     content-align: center middle;
 }
-
 
 MainMenu Static { 
     /* padding: 1;  */
@@ -36,22 +35,20 @@ MainMenu Static {
 
 #options {
     height: 100%;
-    /* margin: 2 4; */
-    background: black;
-    color: green;
+    max-height: 8;
     border: black;
-    /* padding: 1 2; */
 }
+
 
 Screen {
     background: black;
     color: green;
 }
 
-ListView {
-    background: black;
-    width: 100%;
-}
+# ListView {
+#     background: black;
+#     width: 100%;
+# }
 
 ListItem {
     background: black;
@@ -59,22 +56,17 @@ ListItem {
     width: 100%;
 }
 
-ListItem > * {
-    background: black;
-    color: green;
-}
-
-ListItem:focus > * {
-    background: green;
-    color: black;
-}
-
-ListItem:focus Label {
-    background: green;
-    color: black;
-}
+# ListItem > * {
+#     background: black;
+#     color: green;
+# }
 
 #shutdown {
+    content-align: center middle;
+    text-align: center;
+}
+
+#bootuptext {
     content-align: center middle;
     text-align: center;
 }
@@ -84,9 +76,6 @@ ListItem:focus Label {
     text-align: center;
 }
 
-#options {
-    max-height: 8;
-}
 
 Header {
     background: black;
