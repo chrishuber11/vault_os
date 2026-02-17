@@ -3,10 +3,13 @@ import subprocess
 import time
 
 def launch_rogue():
-    os.system("clear")
+    os.system("cls")  # Windows clear
     print("INITIALIZING RECREATION MODULE...")
     time.sleep(1.0)
-    print("RECREATION CODE 001 - ROGUE ")
+    print("RECREATION CODE 001 - AXES, ARMOUR, & ALE")
     time.sleep(1.5)
-    subprocess.run(["rogue"])
-    os.system("clear")
+
+    exe_path = os.path.join("games", "Axes.exe")
+    subprocess.run([exe_path])
+
+    os.system("cls")

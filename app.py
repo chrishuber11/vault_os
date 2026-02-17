@@ -6,11 +6,14 @@ from textual import events
 from textual.screen import Screen
 from rich.text import Text
 from textual.message import Message
+from modules.notes import init_db, load_notes, get_note_by_id, create_note, update_note, delete_note
 
 from modules.games import launch_rogue
 from modules.terminal import launch_terminal
 import time
 import asyncio
+import sqlite3
+import os
 
 class Typewriter(Static):
     async def type_out(self, text: str, delay: float = 0.02):
@@ -125,6 +128,8 @@ class Options(ListView):
 
         if item_id == "games":
             self.app.games_menu()
+        elif item_id == "notes":
+            self.app.notes_menu()
         elif item_id == "quit":
             self.app.call_later(self.app.action_quit)
 
@@ -163,6 +168,8 @@ class GameOptions(ListView):
 
         if item_id == "home":
             self.app.return_home()
+        elif item_id == "rogue":
+            launch_rogue()
 
     def compose(self):
         yield FalloutListItem(Label("Rogue"), id="rogue")
@@ -177,6 +184,81 @@ class GamesScreen(Screen):
     def on_mount(self):
         options = self.query_one(GameOptions)
         self.call_after_refresh(options.focus)
+
+class NotesOptions(ListView):
+    #Note Options Menu
+
+    def __init__(self, notes, **kwargs): 
+        super().__init__(**kwargs) 
+        self.notes = notes
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        item_id = event.item.id
+
+        if item_id == "create":
+            new_id = create_note("Note 1","Hello, World!")
+            self.app.open_note(new_id)
+        elif item_id == "home":
+            self.app.return_home()
+        else:
+            #user selected an active note
+            self.app.open_note(item_id)
+
+    def compose(self):
+        yield FalloutListItem(Label("Create New Note"), id="create")
+        for note_id, title in self.notes.items():
+            yield FalloutListItem(Label(title), id=note_id)
+        yield FalloutListItem(Label("Home"), id="home")
+
+class NotesScreen(Screen): 
+    def __init__(self, notes): 
+        super().__init__() 
+        self.notes = notes
+
+    def compose(self): 
+        yield Header()
+        yield MainMenu(id="mainmenu")
+        yield Container(VerticalScroll(NotesOptions(self.notes)), id="options")
+
+    def on_mount(self):
+        options = self.query_one(NotesOptions)
+        self.call_after_refresh(options.focus)
+
+class NoteViewerOptions(ListView):
+    #Note Viewer Options Menu
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        item_id = event.item.id
+
+        if item_id == "edit":
+            self.app.return_home()
+        elif item_id == "delete":
+            self.app.return_home()
+        elif item_id == "home":
+            self.app.return_home()
+
+    def compose(self):
+        yield FalloutListItem(Label("Edit Note"), id="edit")
+        yield FalloutListItem(Label("Delete Note"), id="delete")
+        yield FalloutListItem(Label("Home"), id="home")
+
+class NoteViewerScreen(Screen): 
+    def __init__(self, title, body): 
+        super().__init__() 
+        self.title = title
+        self.body = body
+
+    def compose(self): 
+        yield Header()
+        yield MainMenu(id="mainmenu")
+        yield Typewriter(self.title)
+        yield Typewriter(self.body)
+        yield Container(VerticalScroll(NoteViewerOptions()), id="options")
+
+    def on_mount(self):
+        options = self.query_one(NoteViewerOptions)
+        self.call_after_refresh(options.focus)
+
 
 class VaultOS(App):
 
@@ -199,6 +281,14 @@ class VaultOS(App):
     def games_menu(self):
         self.push_screen(GamesScreen())
 
+    def notes_menu(self):
+        notes = load_notes()
+        self.push_screen(NotesScreen(notes))
+
+    def open_note(self, note_id):
+        title, body = get_note_by_id(note_id)
+        self.push_screen(NoteViewerScreen(title, body))
+
     def return_home(self):
         self.pop_screen()
 
@@ -212,6 +302,7 @@ class VaultOS(App):
         self.exit()
 
     def on_mount(self):
+        init_db()
         self.push_screen(BootUp())
         options = self.query_one(Options)
         self.call_after_refresh(options.focus)
@@ -219,4 +310,3 @@ class VaultOS(App):
 
 if __name__ == "__main__":
     VaultOS().run()
-
