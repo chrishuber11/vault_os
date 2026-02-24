@@ -1,0 +1,12 @@
+[Unit]
+Description=VaultOS Fallout Terminal
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/%u/vault_os
+ExecStart=/home/%u/vault_os/system/startup.sh
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

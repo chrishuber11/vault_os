@@ -1,4 +1,4 @@
-#boot { 
+#bootup { 
     text-align: center;
 }
 
@@ -35,7 +35,7 @@ MainMenu Static {
 
 #options {
     height: 100%;
-    max-height: 8;
+    max-height: 20;
     border: black;
 }
 
@@ -71,6 +71,15 @@ ListItem {
     text-align: center;
 }
 
+#notetitle{
+    content-align: center middle;
+    text-align: center;
+}
+#notebody{
+    content-align: center middle;
+    text-align: left;
+}
+
 #shutdownmenu {
     content-align: center middle;
     text-align: center;
@@ -85,3 +94,40 @@ Header * {
     color: green;
 }
 
+#prompt_line {
+    background: black;
+    color: green;
+    height: auto;
+}
+
+#prompt_symbol {
+    color: green;
+    text-style: bold;
+}
+
+#command_input {
+    background: black;
+    color: green;
+    border: none;
+    text-style: bold;
+}
+
+#command_input:focus {
+    background: black;
+    color: green;
+}
+
+#command_input .cursor {
+    background: green;
+    color: black;
+}
+
+#command_input .placeholder {
+    color: green;
+    text-style: bold;
+}
+
+#command_input .cursor {
+    background: green;
+    color: black;
+}
