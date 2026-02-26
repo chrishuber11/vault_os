@@ -9,6 +9,7 @@ import asyncio
 from modules.notes.logic import init_db, load_notes, get_note_by_id
 from modules.notes.screens import NotesScreen, NoteViewerScreen
 from modules.games.screens import GamesScreen
+from modules.companion.screens import CompanionScreen
 from modules.core.widgets import MainMenu, BootUp, Typewriter, MenuFinished, BootFinished, FalloutListItem
 
 from modules.terminal.terminal import launch_terminal
@@ -39,13 +40,15 @@ class Options(Static):
             self.app.games_menu()
         elif item_id == "notes":
             self.app.notes_menu()
+        elif item_id == "companion":
+            self.app.companion_menu()
         elif item_id == "quit":
             self.app.call_later(self.app.action_quit)
 
     def compose(self):
         yield Vertical(
             ListView(
-                FalloutListItem(Typewriter("", id="chatbot_tw"), id="chatbot"),
+                FalloutListItem(Typewriter("", id="companion_tw"), id="companion"),
                 FalloutListItem(Typewriter("", id="notes_tw"), id="notes"),
                 FalloutListItem(Typewriter("", id="games_tw"), id="games"),
                 FalloutListItem(Typewriter("", id="terminal_tw"), id="terminal"),
@@ -65,7 +68,7 @@ class Options(Static):
         self.call_after_refresh(main_list.focus)
 
         menu_items = [
-            ("chatbot_tw", "Chatbot"),
+            ("companion_tw", "Companion"),
             ("notes_tw", "Notes"),
             ("games_tw", "Games"),
             ("terminal_tw", "Terminal"),
@@ -109,6 +112,9 @@ class VaultOS(App):
     def notes_menu(self):
         notes = load_notes()
         self.push_screen(NotesScreen(notes))
+
+    def companion_menu(self):
+        self.push_screen(CompanionScreen())
 
     def open_note(self, note_id):
         title, body = get_note_by_id(note_id)

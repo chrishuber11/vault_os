@@ -2,6 +2,11 @@ from textual.widgets import Static, ListItem
 from rich.text import Text
 from textual.message import Message
 import asyncio
+from pathlib import Path
+
+def load_ascii(name: str) -> str:
+    path = Path("assets/ascii") / f"{name}.txt"
+    return path.read_text(encoding="utf-8")
 
 class MenuFinished(Message):
     namespace = "menu_finished"

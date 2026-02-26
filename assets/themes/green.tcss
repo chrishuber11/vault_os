@@ -138,3 +138,10 @@ Input > .input--cursor {
     background: green;   /* blinking block cursor */
     color: black;        /* text color inside cursor */
 }
+
+#ascii_art {
+    color: green;
+    background: transparent;
+    text-align: center;
+    padding: 1 0;
+}
