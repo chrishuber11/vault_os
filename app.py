@@ -6,7 +6,7 @@ from textual.widgets import Input
 from textual.widgets import ListView
 import asyncio
 
-from modules.notes.logic import init_db, load_notes, get_note_by_id, create_note, update_note, delete_note
+from modules.notes.logic import init_db, load_notes, get_note_by_id
 from modules.notes.screens import NotesScreen, NoteViewerScreen
 from modules.games.screens import GamesScreen
 from modules.core.widgets import MainMenu, BootUp, Typewriter, MenuFinished, BootFinished, FalloutListItem
@@ -112,7 +112,7 @@ class VaultOS(App):
 
     def open_note(self, note_id):
         title, body = get_note_by_id(note_id)
-        self.push_screen(NoteViewerScreen(title, body))
+        self.push_screen(NoteViewerScreen(note_id, title, body))
 
     def return_home(self):
         self.pop_screen()

@@ -2,8 +2,10 @@ from textual.widgets import Static, ListView, Label
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Input
 from textual.widgets import ListView
-from modules.notes.logic import init_db, load_notes, get_note_by_id, create_note, update_note, delete_note
+from modules.notes.logic import create_note
 from modules.core.widgets import FalloutListItem
+
+#NEEDS A PROPER REFRESH AFTER ANY DATABASE CHANGES TO OPTIONS MENU
 
 class NotesOptions(Static):
     #Note Options Menu
@@ -19,7 +21,6 @@ class NotesOptions(Static):
         if item_id == "create":
             self.pending_action = "create_note"
             input_box = self.query_one("#command_input")
-            # input_box.placeholder = "Enter note name"
             input_box.focus()
         elif item_id == "home":
             self.app.return_home()
@@ -65,18 +66,47 @@ class NoteViewerOptions(Static):
         item_id = event.item.id
 
         if item_id == "edit":
-            self.app.return_home()
+            screen = self.screen
+            screen.enter_edit_mode()
+        elif item_id == "rename":
+            self.pending_action = "rename"
+            input_box = self.query_one("#command_input")
+            input_box.focus()
         elif item_id == "delete":
-            self.app.return_home()
+            self.pending_action = "delete"
+            input_box = self.query_one("#command_input")
+            input_box.placeholder = 'Type "CONFIRM" to Delete.'
+            input_box.focus()
         elif item_id == "home":
             self.app.return_home()
+
+    def on_input_submitted(self, event: Input.Submitted):
+        text = event.value
+
+        if self.pending_action == "rename":
+            screen = self.screen
+            screen.rename_note(text)
+            notes_list = self.query_one("#note_viewer_list", ListView)
+            notes_list.focus()
+        elif self.pending_action == "delete":
+            if text == "CONFIRM":
+                screen = self.screen
+                screen.confirm_delete_note()
+            notes_list = self.query_one("#note_viewer_list", ListView)
+            notes_list.focus()
+            self.app.return_home()
+
+        # clear the mode
+        self.pending_action = None
+        event.input.value = ""
 
     def compose(self):
         yield Vertical(
             ListView(
-                FalloutListItem(Label("Edit Note"), id="edit"),
-                FalloutListItem(Label("Delete Note"), id="delete"),
-                FalloutListItem(Label("Home"), id="home"),
+                FalloutListItem(Label("Edit"), id="edit"),
+                FalloutListItem(Label("Rename"), id="rename"),
+                FalloutListItem(Label("Delete"), id="delete"),
+                FalloutListItem(Label("Back to Notes List"), id="home"),
                 id="note_viewer_list"
             ),
             Horizontal(

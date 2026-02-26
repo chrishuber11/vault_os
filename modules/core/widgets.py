@@ -1,11 +1,6 @@
-from textual.app import App, ComposeResult
-from textual.widgets import Static, Header, ListView, ListItem, Label
-from textual.containers import VerticalScroll, Container, Horizontal, Vertical
-from textual.screen import Screen
+from textual.widgets import Static, ListItem
 from rich.text import Text
 from textual.message import Message
-from textual.widgets import Input
-from textual.widgets import ListView
 import asyncio
 
 class MenuFinished(Message):
@@ -56,7 +51,7 @@ Welcome to ROBCO Industries (TM) Termlink"""
                 return
 
             # Otherwise animate it
-            await tw.type_out(self.MENU_TEXT, delay=0.025)
+            await tw.type_out(self.MENU_TEXT, delay=0.03)
             self.app.main_menu_animated = True
             self.app.post_message(MenuFinished())
 

@@ -45,21 +45,11 @@ Screen {
     color: green;
 }
 
-# ListView {
-#     background: black;
-#     width: 100%;
-# }
-
 ListItem {
     background: black;
     color: green;
     width: 100%;
 }
-
-# ListItem > * {
-#     background: black;
-#     color: green;
-# }
 
 #shutdown {
     content-align: center middle;
@@ -84,7 +74,6 @@ ListItem {
     content-align: center middle;
     text-align: center;
 }
-
 
 Header {
     background: black;
@@ -130,4 +119,22 @@ Header * {
 #command_input .cursor {
     background: green;
     color: black;
+}
+
+Input {
+    background: transparent;
+    border: none;
+    color: green;
+    padding: 0;
+    height: auto;
+}
+
+Input > .input--content {
+    background: transparent;
+    color: green;
+}
+
+Input > .input--cursor {
+    background: green;   /* blinking block cursor */
+    color: black;        /* text color inside cursor */
 }
